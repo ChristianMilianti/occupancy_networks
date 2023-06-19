@@ -13,6 +13,7 @@ from im2mesh.utils.io import export_pointcloud
 from im2mesh.utils.visualize import visualize_data
 from im2mesh.utils.voxels import VoxelGrid
 
+print("debug 1")
 
 parser = argparse.ArgumentParser(
     description='Extract meshes from occupancy process.'
@@ -20,10 +21,16 @@ parser = argparse.ArgumentParser(
 parser.add_argument('config', type=str, help='Path to config file.')
 parser.add_argument('--no-cuda', action='store_true', help='Do not use cuda.')
 
+print("debug 2")
 args = parser.parse_args()
 cfg = config.load_config(args.config, 'configs/default.yaml')
+
+print("cfg =" , cfg)
 is_cuda = (torch.cuda.is_available() and not args.no_cuda)
+print("is cuda = ", is_cuda)
 device = torch.device("cuda" if is_cuda else "cpu")
+#device = "cpu"
+print("device = ", device)
 
 out_dir = cfg['training']['out_dir']
 generation_dir = os.path.join(out_dir, cfg['generation']['generation_dir'])
@@ -36,21 +43,33 @@ vis_n_outputs = cfg['generation']['vis_n_outputs']
 if vis_n_outputs is None:
     vis_n_outputs = -1
 
+print("debug 3a")
 # Dataset
 dataset = config.get_dataset('test', cfg, return_idx=True)
+print(dataset)
+print("debug 3b")
 
 # Model
 model = config.get_model(cfg, device=device, dataset=dataset)
+print(model)
+print("debug 3c")
 
 checkpoint_io = CheckpointIO(out_dir, model=model)
+print("debug 3d")
 checkpoint_io.load(cfg['test']['model_file'])
+print("debug 3e")
 
 # Generator
 generator = config.get_generator(model, cfg, device=device)
+print("debug 3f")
 
 # Determine what to generate
 generate_mesh = cfg['generation']['generate_mesh']
+print("debug 3g")
 generate_pointcloud = cfg['generation']['generate_pointcloud']
+
+
+print("debug 4")
 
 if generate_mesh and not hasattr(generator, 'generate_mesh'):
     generate_mesh = False
